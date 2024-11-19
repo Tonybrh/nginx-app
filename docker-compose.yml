@@ -12,9 +12,12 @@ services:
     image: nginx:latest
     container_name: proxy
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    - ./certs/app1.local.crt:/etc/ssl/certs/app1.local.crt
+    - ./certs/app1.local.key:/etc/ssl/private/app1.local.key
+    - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
-      - "80:80"
+      - "445:443"
+      - "8080:80"
     networks:
       private_network:
         ipv4_address: 10.10.10.2
