@@ -4,9 +4,10 @@
 
 ### No arquivo /etc/hosts deve adicionar ao localhost os IPs da aplicação da forma abaixo
 
-<pre> 10.10.10.10 app1.local
-10.10.10.20 app2.local
-10.10.10.30 app3.local
+<pre> 
+  10.10.10.10 app1.local
+  10.10.10.20 app2.local
+  10.10.10.30 app3.local
 </pre>
 
 ### Executar o comando para subir os containers
