@@ -1,93 +1,140 @@
-version: '3.9'
-
-networks:
-  private_network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 10.10.10.0/24
+version: '3.7'
 
 services:
-  proxy:
+  # Proxy reverso (Nginx)
+  nginx:
     image: nginx:latest
-    container_name: proxy
+    container_name: nginx-proxy
     volumes:
-    - ./certs/app1.local.crt:/etc/ssl/certs/app1.local.crt
-    - ./certs/app1.local.key:/etc/ssl/private/app1.local.key
-    - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - "445:443"
-      - "8080:80"
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     networks:
-      private_network:
+      app_network:
         ipv4_address: 10.10.10.2
+    ports:
+      - "81:81"
     depends_on:
       - app1
       - app2
       - app3
 
+  # Aplicação 1
   app1:
-    build:
-      context: ./firstApp
+    build: ./app/app1
     container_name: app1
     networks:
-      private_network:
-        ipv4_address: 10.10.10.10
-    environment:
-      - DATABASE_URL=mysql://user:password@db1:3306/app1db
-    depends_on:
-      - db1
+      app_network:
+        ipv4_address: 10.10.10.3
 
+  # Banco de dados 1 (MySQL) com PHPMyAdmin
   db1:
-    image: mysql:8.0
+    image: mysql:5.7
     container_name: db1
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: app1db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: app1_db
+    volumes:
+      - db1_data:/var/lib/mysql
     networks:
-      private_network:
-        ipv4_address: 10.10.10.11
+      app_network:
+        ipv4_address: 10.10.10.4
 
+  db1_phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: db1_phpmyadmin
+    environment:
+      PMA_HOST: db1
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+    ports:
+      - "8081:80"
+    networks:
+      app_network:
+        ipv4_address: 10.10.10.5
+
+  # Aplicação 2
   app2:
-    build:
-      context: ./secondApp
+    build: ./app/app2
     container_name: app2
     networks:
-      private_network:
-        ipv4_address: 10.10.10.20
-    environment:
-      - DATABASE_URL=postgresql://user:password@db2:5432/app2db
-    depends_on:
-      - db2
+      app_network:
+        ipv4_address: 10.10.10.6
 
+  # Banco de dados 2 (MySQL) com PHPMyAdmin
   db2:
-    image: postgres:15
+    image: mysql:5.7
     container_name: db2
     environment:
-      POSTGRES_DB: app2db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: app2_db
+    volumes:
+      - db2_data:/var/lib/mysql
     networks:
-      private_network:
-        ipv4_address: 10.10.10.21
+      app_network:
+        ipv4_address: 10.10.10.7
 
+  db2_phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: db2_phpmyadmin
+    environment:
+      PMA_HOST: db2
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+    ports:
+      - "8082:80"
+    networks:
+      app_network:
+        ipv4_address: 10.10.10.8
+
+  # Aplicação 3
   app3:
-    build:
-      context: ./thirdApp
+    build: ./app/app3
     container_name: app3
     networks:
-      private_network:
-        ipv4_address: 10.10.10.30
-    environment:
-      - DATABASE_URL=mongodb://db3:27017/app3db
-    depends_on:
-      - db3
+      app_network:
+        ipv4_address: 10.10.10.9
 
+  # Banco de dados 3 (MySQL) com PHPMyAdmin
   db3:
-    image: mongo:6
+    image: mysql:5.7
     container_name: db3
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: app3_db
+    volumes:
+      - db3_data:/var/lib/mysql
     networks:
-      private_network:
-        ipv4_address: 10.10.10.31
+      app_network:
+        ipv4_address: 10.10.10.10
+
+  db3_phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: db3_phpmyadmin
+    environment:
+      PMA_HOST: db3
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+    ports:
+      - "8083:80"
+    networks:
+      app_network:
+        ipv4_address: 10.10.10.11
+
+  # Contêiner de avaliação
+  jadilsonpaiva_full:
+    image: jadilsonpaiva/full
+    container_name: jadilsonpaiva_full
+    networks:
+      app_network:
+        ipv4_address: 10.10.10.12
+
+volumes:
+  db1_data:
+  db2_data:
+  db3_data:
+
+networks:
+  app_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "10.10.10.0/24"
