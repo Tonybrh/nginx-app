@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 
 services:
   # Proxy reverso (Nginx)
@@ -8,10 +8,9 @@ services:
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     networks:
-      app_network:
-        ipv4_address: 10.10.10.2
+      nginx-app_app_network:
     ports:
-      - "81:81"
+      - "8080:80"
     depends_on:
       - app1
       - app2
@@ -22,8 +21,9 @@ services:
     build: ./app/app1
     container_name: app1
     networks:
-      app_network:
-        ipv4_address: 10.10.10.3
+      nginx-app_app_network:
+    expose:
+      - "80"
 
   # Banco de dados 1 (MySQL) com PHPMyAdmin
   db1:
@@ -35,8 +35,7 @@ services:
     volumes:
       - db1_data:/var/lib/mysql
     networks:
-      app_network:
-        ipv4_address: 10.10.10.4
+      nginx-app_db1_network:
 
   db1_phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -45,19 +44,24 @@ services:
       PMA_HOST: db1
       PMA_USER: root
       PMA_PASSWORD: rootpassword
+    networks:
+      - nginx-app_db1_network # Nome correto da rede
     ports:
       - "8081:80"
+
+  # Container de avaliação para app1
+  jadilsonpaiva_full_app1:
+    image: jadilsonpaiva/full
+    container_name: jadilsonpaiva_full_app1
     networks:
-      app_network:
-        ipv4_address: 10.10.10.5
+      - nginx-app_db1_network
 
   # Aplicação 2
   app2:
     build: ./app/app2
     container_name: app2
     networks:
-      app_network:
-        ipv4_address: 10.10.10.6
+      nginx-app_app_network:
 
   # Banco de dados 2 (MySQL) com PHPMyAdmin
   db2:
@@ -69,8 +73,7 @@ services:
     volumes:
       - db2_data:/var/lib/mysql
     networks:
-      app_network:
-        ipv4_address: 10.10.10.7
+      nginx-app_db2_network:
 
   db2_phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -79,19 +82,24 @@ services:
       PMA_HOST: db2
       PMA_USER: root
       PMA_PASSWORD: rootpassword
+    networks:
+      - nginx-app_db2_network # Nome correto da rede
     ports:
       - "8082:80"
+
+  # Container de avaliação para app2
+  jadilsonpaiva_full_app2:
+    image: jadilsonpaiva/full
+    container_name: jadilsonpaiva_full_app2
     networks:
-      app_network:
-        ipv4_address: 10.10.10.8
+      - nginx-app_db2_network
 
   # Aplicação 3
   app3:
     build: ./app/app3
     container_name: app3
     networks:
-      app_network:
-        ipv4_address: 10.10.10.9
+      nginx-app_app_network:
 
   # Banco de dados 3 (MySQL) com PHPMyAdmin
   db3:
@@ -103,8 +111,7 @@ services:
     volumes:
       - db3_data:/var/lib/mysql
     networks:
-      app_network:
-        ipv4_address: 10.10.10.10
+      - nginx-app_db3_network
 
   db3_phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -113,19 +120,17 @@ services:
       PMA_HOST: db3
       PMA_USER: root
       PMA_PASSWORD: rootpassword
+    networks:
+      nginx-app_db3_network:
     ports:
       - "8083:80"
-    networks:
-      app_network:
-        ipv4_address: 10.10.10.11
 
-  # Contêiner de avaliação
-  jadilsonpaiva_full:
+  # Container de avaliação para app3
+  jadilsonpaiva_full_app3:
     image: jadilsonpaiva/full
-    container_name: jadilsonpaiva_full
+    container_name: jadilsonpaiva_full_app3
     networks:
-      app_network:
-        ipv4_address: 10.10.10.12
+      - nginx-app_db3_network
 
 volumes:
   db1_data:
@@ -133,8 +138,23 @@ volumes:
   db3_data:
 
 networks:
-  app_network:
+  nginx-app_db1_network:
     driver: bridge
     ipam:
       config:
-        - subnet: "10.10.10.0/24"
+        - subnet: 10.20.10.0/28 # Faixa de IP modificada para evitar sobreposição
+  nginx-app_db2_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.20.10.16/28 # Faixa de IP modificada para evitar sobreposição
+  nginx-app_db3_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.20.10.32/28 # Faixa de IP modificada para evitar sobreposição
+  nginx-app_app_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.20.10.48/28 # Faixa de IP modificada para evitar sobreposição
