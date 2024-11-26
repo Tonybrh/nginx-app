@@ -8,6 +8,9 @@
   127.0.0.1 app1.local
   127.0.0.1 app2.local
   127.0.0.1 app3.local
+  127.0.0.1 phpmyadmin.local
+  127.0.0.1 phpmyadmin2.local
+  127.0.0.1 phpmyadmin3.local
 </pre>
 
 ### Executar o comando para subir os containers
