@@ -142,19 +142,19 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 10.20.10.0/28 # Faixa de IP modificada para evitar sobreposição
+        - subnet: 10.20.10.0/28
   nginx-app_db2_network:
     driver: bridge
     ipam:
       config:
-        - subnet: 10.20.10.16/28 # Faixa de IP modificada para evitar sobreposição
+        - subnet: 10.20.10.16/28
   nginx-app_db3_network:
     driver: bridge
     ipam:
       config:
-        - subnet: 10.20.10.32/28 # Faixa de IP modificada para evitar sobreposição
+        - subnet: 10.20.10.32/28
   nginx-app_app_network:
     driver: bridge
     ipam:
       config:
-        - subnet: 10.20.10.48/28 # Faixa de IP modificada para evitar sobreposição
+        - subnet: 10.20.10.48/28
